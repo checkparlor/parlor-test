@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Assessment Framework</title>
+    <style>
+        :root {
+            --primary: #0a2540;
+            --primary-light: #1e3a5f;
+            --secondary: #4f46e5;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --card-bg: #ffffff;
+            --header-height: 80px;
+            
+            /* Vendor colors */
+            --crowdstrike: #fa582d;
+            --absolute: #0046ad;
+            --okta: #00297a; 
+            --zscaler: #0076be;
+            --netskope: #7742e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #f9fafb;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            height: var(--header-height);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px;
+            padding: 0.35rem 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-container.main-search {
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        
+        .search-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--dark);
+            width: 100%;
+            font-size: 1rem;
+            padding: 0.65rem 0;
+        }
+        
+        .search-container input::placeholder {
+            color: var(--gray);
+        }
+        
+        .search-icon {
+            display: flex;
+            color: var(--gray);
+        }
+        
+        .search-box-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background-color: white;
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .progress-step.active .step-number {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: var(--header-height) auto 0;
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .page-subtitle {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 800px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Persona Cards */
+        .persona-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+
+        .persona-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary-light);
+        }
+        
+        .persona-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .persona-card .checkbox {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: transparent;
+            font-size: 0.8rem;
+        }
+        
+        .persona-card.selected .checkbox {
+            background-color: var(--primary);
+            border-color: white;
+            color: white;
+        }
+
+        .persona-icon {
+            height: 8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .persona-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .persona-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .persona-description {
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .persona-more {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+
+        /* Question List */
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .filter-controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .filter-controls input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-controls input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            outline: none;
+        }
+        
+        .question-selection-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f5f7fa;
+            border-radius: 8px;
+        }
+        
+        .question-selection-info {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .question-selection-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .question-item {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .question-item:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+            border-left-color: var(--secondary);
+        }
+        
+        .question-item.selected {
+            border-left-color: var(--primary);
+            background-color: #f0f7ff;
+        }
+        
+        .question-checkbox {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            border: 2px solid #d1d5db;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: transparent;
+            font-size: 0.8rem;
+        }
+        
+        .question-item.selected .question-checkbox {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .question-number {
+            display: inline-block;
+            background-color: var(--primary-light);
+            color: white;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-why {
+            font-size: 0.9rem;
+            color: var(--gray);
+            padding-left: 1rem;
+            border-left: 2px solid #e5e7eb;
+            margin-top: 0.5rem;
+        }
+
+        .question-why-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Outcome View */
+        .error-message {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .error-message h3 {
+            color: #b91c1c;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .error-message p {
+            color: #7f1d1d;
+        }
+        
+        .error-message pre {
+            margin-top: 1rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        
+        .no-products {
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
+            background-color: #f9fafb;
+            border-radius: 8px;
+            grid-column: 1 / -1;
+        }
+        
+        .outcome-container {
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .outcomes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .outcome-header {
+            background-color: var(--primary-light);
+            padding: 2rem;
+            color: white;
+        }
+        
+        .outcome-question {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .outcome-box {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .outcome-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .outcome-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .outcome-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .no-outcomes-message {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            font-size: 1rem;
+            color: var(--gray);
+            max-width: 400px;
+        }
+
+        .product-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding: 0 2rem 2rem;
+        }
+
+        .product-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .product-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .product-logo {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .product-logo.crowdstrike {
+            background-color: var(--crowdstrike);
+        }
+
+        .product-logo.absolute {
+            background-color: var(--absolute);
+        }
+
+        .product-logo.okta {
+            background-color: var(--okta);
+        }
+
+        .product-logo.zscaler {
+            background-color: var(--zscaler);
+        }
+
+        .product-logo.netskope {
+            background-color: var(--netskope);
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .product-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-capabilities {
+            font-size: 1rem;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-capabilities strong {
+            color: var(--dark);
+        }
+        
+        .product-bottom {
+            margin-top: auto;
+        }
+
+        .strength-indicator {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .strength-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .strength-bar {
+            flex-grow: 1;
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .strength-value {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 3px;
+        }
+
+        .strength-value.primary {
+            background-color: var(--primary);
+            width: 100%;
+        }
+
+        .strength-value.strong {
+            background-color: var(--success);
+            width: 90%;
+        }
+
+        .strength-value.good {
+            background-color: var(--accent);
+            width: 75%;
+        }
+
+        .strength-value.moderate {
+            background-color: var(--warning);
+            width: 60%;
+        }
+        
+        /* Product More Info button */
+        .product-more-btn {
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary);
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .product-more-btn:hover {
+            background-color: rgba(30, 58, 95, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Navigation controls */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        /* Utility classes */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        /* Selection controls */
+        .selection-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f5f7fa;
+            border-radius: 8px;
+        }
+        
+        .selection-info {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .selection-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+                /* Standardized button styles */
+        button.btn {
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+        }
+        
+        button.btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        button.btn-primary:hover:not(.disabled) {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button.btn-secondary {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        button.btn-secondary:hover:not(.disabled) {
+            background-color: rgba(30, 58, 95, 0.1);
+        }
+        
+        button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+        }
+        
+        .selection-actions button {
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .continue-btn {
+            background-color: var(--primary) !important;
+            color: white !important;
+        }
+        
+        .continue-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            background-color: var(--gray) !important;
+            border-color: var(--gray) !important;
+        }
+        
+        /* Question tag */
+        .question-persona-tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white;
+            background-color: var(--primary-light);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Search results */
+        .search-results {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-height: 500px;
+            overflow-y: auto;
+            z-index: 110;
+            display: none;
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-results-header {
+            padding: 1rem;
+            font-weight: 500;
+            border-bottom: 1px solid #e5e7eb;
+            color: var(--dark);
+        }
+        
+        .search-results-list {
+            padding: 0.5rem;
+        }
+        
+        .search-result-item {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f5f7fa;
+        }
+        
+        .search-result-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--primary);
+        }
+        
+        .search-result-text {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .search-highlight {
+            background-color: rgba(77, 70, 229, 0.2);
+            padding: 0 0.15rem;
+            border-radius: 2px;
+        }
+        
+        .no-results {
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-indicator {
+                display: none;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <i>🛡️</i>
+            </div>
+            <span>Security Assessment Framework</span>
+        </div>
+        
+        <div class="progress-indicator">
+            <div class="progress-step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-label">Select Persona</div>
+            </div>
+            <div class="progress-step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-label">Choose Question</div>
+            </div>
+            <div class="progress-step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-label">View Outcome</div>
+            </div>
+        </div>
+    </header>
+    
+            <div class="container">
+        <!-- Persona Selection View -->
+        <div id="persona-view" class="view active">
+            <h1 class="page-title">Select Your Security Persona</h1>
+            <p class="page-subtitle">Choose one or more roles that match your position or the stakeholders you're preparing for.</p>
+            
+            <div class="search-box-container">
+                <div class="search-container main-search">
+                    <input type="text" id="global-search" placeholder="Search questions, outcomes, or products...">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                </div>
+                
+                <!-- Search Results moved here -->
+                <div class="search-results" id="search-results">
+                    <div class="search-results-header">Search Results</div>
+                    <div class="search-results-list" id="search-results-list">
+                        <!-- Search results will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="selection-controls">
+                <div class="selection-info">
+                    <span id="personas-selected">0 personas selected</span>
+                </div>
+                <div class="selection-actions">
+                    <button id="select-all-btn" class="btn btn-secondary">Select All</button>
+                    <button id="clear-selection-btn" class="btn btn-secondary">Clear</button>
+                    <button id="continue-btn" class="btn btn-primary disabled">Continue</button>
+                </div>
+            </div>
+            
+            <div class="grid">
+                <div class="persona-card" data-persona="cio">
+                    <div class="persona-icon">👨‍💼</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Chief Information Officer (CIO)</h3>
+                        <p class="persona-description">Responsible for overall IT strategy, innovation, and aligning technology with business goals.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="ciso">
+                    <div class="persona-icon">🔐</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Chief Information Security Officer (CISO)</h3>
+                        <p class="persona-description">Responsible for establishing and maintaining the enterprise vision and strategy to ensure information assets are protected.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="soc-manager">
+                    <div class="persona-icon">🖥️</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">SOC Manager</h3>
+                        <p class="persona-description">Oversees security operations center and incident response, responsible for threat monitoring and detection.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="security-architect">
+                    <div class="persona-icon">🏗️</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Security Architect</h3>
+                        <p class="persona-description">Designs, builds, and oversees the implementation of network and computer security for an organization.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="it-security-director">
+                    <div class="persona-icon">👩‍💼</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">IT Security Director</h3>
+                        <p class="persona-description">Manages security technology implementation and operations across the enterprise.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="security-engineer">
+                    <div class="persona-icon">👨‍💻</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Security Engineer</h3>
+                        <p class="persona-description">Builds and maintains security infrastructure and tools to protect company assets.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="compliance-officer">
+                    <div class="persona-icon">📜</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Compliance Officer</h3>
+                        <p class="persona-description">Ensures the organization meets regulatory requirements and internal policies for security.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="persona-card" data-persona="risk-manager">
+                    <div class="persona-icon">⚠️</div>
+                    <div class="checkbox">✓</div>
+                    <div class="persona-content">
+                        <h3 class="persona-title">Risk Manager</h3>
+                        <p class="persona-description">Identifies, evaluates, and prioritizes security risks to minimize, monitor, and control them.</p>
+                        <div class="persona-more">
+                            <span>Select Persona</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question Selection View -->
+        <div id="question-view" class="view">
+            <h1 class="page-title" id="selected-persona-title">Questions for <span></span></h1>
+            <p class="page-subtitle">Choose one or more security assessment questions relevant to your role and priorities.</p>
+            
+            <div class="filter-controls">
+                <input type="text" id="question-search" placeholder="Search through questions...">
+            </div>
+            
+            <div class="question-selection-controls">
+                <div class="question-selection-info">
+                    <span id="questions-selected">0 questions selected</span>
+                </div>
+                <div class="question-selection-actions">
+                    <button id="select-all-questions-btn" class="btn btn-secondary">Select All</button>
+                    <button id="clear-questions-btn" class="btn btn-secondary">Clear</button>
+                    <button id="view-outcomes-btn" class="btn btn-primary disabled">View Outcomes</button>
+                </div>
+            </div>
+            
+            <div class="question-list" id="question-list">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+            
+            <div class="nav-controls">
+                <button class="btn btn-secondary" id="back-to-persona">
+                    <span>←</span>
+                    <span>Back to Personas</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Outcome View for Multiple Questions -->
+        <div id="outcome-view" class="view">
+            <div class="outcome-controls">
+                <h1 class="page-title">Selected Outcomes</h1>
+                <p class="page-subtitle">Review the security outcomes for your selected questions.</p>
+            </div>
+            
+            <div id="outcomes-container" class="outcomes-container">
+                <!-- Outcomes will be added here dynamically -->
+            </div>
+            
+            <div id="no-outcomes-message" class="no-outcomes-message hidden">
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>No outcomes to display</h3>
+                    <p>Please select at least one question to see security outcomes and product recommendations.</p>
+                </div>
+            </div>
+            
+            <div class="nav-controls">
+                <button class="btn btn-secondary" id="back-to-questions">
+                    <span>←</span>
+                    <span>Back to Questions</span>
+                </button>
+                <button class="btn btn-primary" id="restart">
+                    <span>Start New Assessment</span>
+                    <span>↻</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // All questions and outcomes for search functionality
+            const allQuestions = [];
+            const allOutcomes = {};
+            
+            // Data structure
+            const personaData = {
+                "cio": {
+                    title: "Chief Information Officer (CIO)",
+                    questions: [
+                        {
+                            id: 1,
+                            number: "1",
+                            text: "What are your primary security concerns and pain points today?",
+                            why: "Helps identify whether the focus should be on endpoint, network, or cloud security",
+                            outcome: {
+                                title: "Strategic Security Posture",
+                                description: "Prioritization of security investments across endpoint, network, and cloud security based on actual business risks and concerns.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides comprehensive security telemetry and threat analytics to prioritize security investment areas",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Offers endpoint risk assessment and visibility for data-driven security decisions",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Delivers cloud security risk insights to guide strategic investment",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Provides cloud security risk insights with visibility into shadow IT",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 10,
+                            number: "10",
+                            text: "What is your organization's approach to Zero Trust, identity security, and multi-factor authentication (MFA)?",
+                            why: "Evaluates the need for ZTNA, IAM, MFA, or behavioral analytics solutions",
+                            outcome: {
+                                title: "Zero Trust & Identity Security",
+                                description: "Reduced attack surface through implementation of ZTNA architecture, enhanced IAM controls, MFA deployment, and behavioral analytics solutions.",
+                                products: [
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Primary strength with comprehensive IAM/MFA solutions and Zero Trust enablement",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Specializes in ZTNA implementation with strong network-based controls",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Offers identity-aware cloud access controls for Zero Trust architecture",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "ciso": {
+                    title: "Chief Information Security Officer (CISO)",
+                    questions: [
+                        {
+                            id: 2,
+                            number: "2",
+                            text: "What cybersecurity frameworks or compliance regulations (e.g., NIST, ISO 27001, HIPAA, GDPR) do you need to adhere to?",
+                            why: "Determines the necessary security controls and compliance-driven solutions",
+                            outcome: {
+                                title: "Compliance & Governance",
+                                description: "Implementation of appropriate controls, documentation, and solutions that satisfy specific regulatory requirements and demonstrate compliance.",
+                                products: [
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Provides compliance reporting and device attestation across endpoints",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Enables identity compliance and access certification for regulatory requirements",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Offers SaaS compliance and data governance for cloud environments",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 9,
+                            number: "9",
+                            text: "What is your current incident response and disaster recovery plan in case of a breach?",
+                            why: "Helps identify gaps in SOC capabilities, automation, or endpoint/network backup solutions",
+                            outcome: {
+                                title: "Incident Response & Recovery",
+                                description: "Minimized breach impact through enhanced SOC capabilities, automated response procedures, and reliable backup/recovery solutions.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides IR services and automated response for rapid breach containment",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Enables device recovery and data protection across endpoints",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Offers network containment capabilities during active incidents",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "soc-manager": {
+                    title: "SOC Manager",
+                    questions: [
+                        {
+                            id: 3,
+                            number: "3",
+                            text: "How do you currently detect and respond to threats across your endpoints, network, and cloud environments?",
+                            why: "Identifies existing security gaps in threat detection & response (EDR, NDR, XDR)",
+                            outcome: {
+                                title: "Threat Detection & Response",
+                                description: "Enhanced threat detection capabilities through appropriate EDR/NDR/XDR solutions that close visibility gaps and improve response times.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Primary strength in EDR/XDR with the Falcon platform for comprehensive threat detection",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Provides network-level threat detection across cloud traffic",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Specializes in Cloud/SaaS threat detection with contextual awareness",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 11,
+                            number: "11",
+                            text: "Do you have a 24/7 SOC, or do you require outsourced security monitoring and response?",
+                            why: "Determines if the organization needs Managed Detection and Response (MDR), SIEM-as-a-Service, or a fully managed SOC",
+                            outcome: {
+                                title: "Security Operations",
+                                description: "Continuous security monitoring through either in-house SOC enhancements or appropriate MDR services, SIEM-as-a-Service, or fully managed SOC solutions.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides managed detection and response services with 24/7 expert monitoring",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Offers cloud SOC capabilities with advanced traffic analysis",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Provides cloud security monitoring for SaaS and cloud environments",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "security-architect": {
+                    title: "Security Architect",
+                    questions: [
+                        {
+                            id: 4,
+                            number: "4",
+                            text: "What level of visibility do you have into user activities, network traffic, and cloud workloads?",
+                            why: "Uncovers the need for SIEM, network monitoring, or cloud security posture management (CSPM)",
+                            outcome: {
+                                title: "Security Visibility",
+                                description: "Comprehensive security monitoring across all environments through SIEM implementation, enhanced network monitoring, or cloud security posture management.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides endpoint and workload visibility with comprehensive telemetry",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Enables persistent endpoint visibility with hardware-level resilience",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Offers SaaS/cloud visibility with detailed usage analytics",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Provides network traffic visibility across all connected users",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 6,
+                            number: "6",
+                            text: "How are endpoints (workstations, servers, mobile devices) secured, and do you have an EDR/EPP solution in place?",
+                            why: "Identifies gaps in endpoint security and whether additional protection (e.g., zero trust, MDR) is needed",
+                            outcome: {
+                                title: "Endpoint Protection",
+                                description: "Strengthened endpoint security posture through appropriate EDR/EPP deployment, zero trust implementation, or managed detection and response services.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Primary strength with Falcon EDR/EPP platform for comprehensive endpoint protection",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Provides persistent endpoint control and self-healing capabilities",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Offers endpoint agent for ZTNA implementation",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "it-security-director": {
+                    title: "IT Security Director",
+                    questions: [
+                        {
+                            id: 5,
+                            number: "5",
+                            text: "What security tools are currently deployed, and how well are they integrated?",
+                            why: "Helps determine if solutions like SOAR, SIEM, or an XDR platform could improve efficiency",
+                            outcome: {
+                                title: "Security Tool Integration",
+                                description: "Improved operational efficiency through consolidated security platforms (XDR, SOAR) that reduce alert fatigue and streamline security operations.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides XDR platform with extensive integrations across security ecosystem",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Offers identity platform integrations with broad technology partnerships",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Enables API-based cloud security integrations with major platforms",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Provides API-based cloud security integrations for SaaS environments",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 8,
+                            number: "8",
+                            text: "What cloud environments are you using (AWS, Azure, GCP, SaaS apps), and how are they currently secured?",
+                            why: "Assesses the need for CASB, CSPM, CIEM, or cloud-native security solutions",
+                            outcome: {
+                                title: "Cloud Security",
+                                description: "Secure cloud operations through appropriate CASB, CSPM, CIEM, or cloud-native security solutions tailored to specific cloud environments.",
+                                products: [
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Primary strength with CASB capabilities and advanced cloud security",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Provides cloud security through SASE architecture",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Offers cloud workload protection for infrastructure services",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "security-engineer": {
+                    title: "Security Engineer",
+                    questions: [
+                        {
+                            id: 7,
+                            number: "7",
+                            text: "How do you protect against advanced threats like ransomware, phishing, and insider threats?",
+                            why: "Determines if AI-driven threat detection, email security, or identity-based security is required",
+                            outcome: {
+                                title: "Advanced Threat Protection",
+                                description: "Reduced risk of advanced attacks through deployment of AI-driven threat detection, enhanced email security, or identity-based protection measures.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Provides AI-driven threat hunting and prevention with advanced behavioral detection",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Enables identity threat detection with behavioral analytics",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Offers advanced cloud-based threat prevention for web traffic",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Provides advanced cloud-based threat prevention for SaaS applications",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            id: 12,
+                            number: "12",
+                            text: "How often do you conduct penetration testing or red team assessments to evaluate your security posture?",
+                            why: "Identifies whether the organization has a proactive offensive security strategy or needs services like Penetration Testing, Red Teaming, or Vulnerability Assessments",
+                            outcome: {
+                                title: "Offensive Security",
+                                description: "Proactive security improvements through regular penetration testing, red team exercises, or comprehensive vulnerability assessment programs.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Offers adversary simulation services with industry-leading threat intelligence",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Provides vulnerability assessment for endpoints with persistent visibility",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Zscaler",
+                                        logo: "zscaler",
+                                        capability: "Enables attack surface monitoring across internet-facing assets",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "compliance-officer": {
+                    title: "Compliance Officer",
+                    questions: [
+                        {
+                            id: 2,
+                            number: "2",
+                            text: "What cybersecurity frameworks or compliance regulations (e.g., NIST, ISO 27001, HIPAA, GDPR) do you need to adhere to?",
+                            why: "Determines the necessary security controls and compliance-driven solutions",
+                            outcome: {
+                                title: "Compliance & Governance",
+                                description: "Implementation of appropriate controls, documentation, and solutions that satisfy specific regulatory requirements and demonstrate compliance.",
+                                products: [
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Provides compliance reporting and device attestation across endpoints",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Enables identity compliance and access certification for regulatory requirements",
+                                        strength: "strong"
+                                    },
+                                    {
+                                        name: "Netskope",
+                                        logo: "netskope",
+                                        capability: "Offers SaaS compliance and data governance for cloud environments",
+                                        strength: "good"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "risk-manager": {
+                    title: "Risk Manager",
+                    questions: [
+                        {
+                            id: 13,
+                            number: "13",
+                            text: "What is your current incident response plan, and do you have an external partner for incident handling and forensics?",
+                            why: "Helps determine if they need Incident Response Retainers, Digital Forensics, or a Business Continuity Plan (BCP)",
+                            outcome: {
+                                title: "Incident Response Capabilities",
+                                description: "Faster incident resolution through established IR plans, retained forensics expertise, and comprehensive business continuity planning.",
+                                products: [
+                                    {
+                                        name: "CrowdStrike",
+                                        logo: "crowdstrike",
+                                        capability: "Primary strength with IR services and forensics expertise",
+                                        strength: "primary"
+                                    },
+                                    {
+                                        name: "Absolute",
+                                        logo: "absolute",
+                                        capability: "Enables endpoint forensics and recovery with persistent connections",
+                                        strength: "good"
+                                    },
+                                    {
+                                        name: "Okta",
+                                        logo: "okta",
+                                        capability: "Provides identity breach remediation with account recovery",
+                                        strength: "moderate"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            };
+            
+            // UI Elements
+            const personaView = document.getElementById('persona-view');
+            const questionView = document.getElementById('question-view');
+            const outcomeView = document.getElementById('outcome-view');
+            
+            const personaCards = document.querySelectorAll('.persona-card');
+            const questionList = document.getElementById('question-list');
+            const selectedPersonaTitle = document.getElementById('selected-persona-title').querySelector('span');
+            
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            
+            const backToPersonaBtn = document.getElementById('back-to-persona');
+            const backToQuestionsBtn = document.getElementById('back-to-questions');
+            const restartBtn = document.getElementById('restart');
+            
+            let currentPersona = null;
+            let selectedPersonas = [];
+            
+            // Initialize
+            function init() {
+                // Back buttons
+                backToPersonaBtn.addEventListener('click', function() {
+                    showView(personaView);
+                    step1.classList.add('active');
+                    step2.classList.remove('active');
+                });
+                
+                backToQuestionsBtn.addEventListener('click', function() {
+                    showView(questionView);
+                    step2.classList.add('active');
+                    step3.classList.remove('active');
+                });
+                
+                restartBtn.addEventListener('click', function() {
+                    showView(personaView);
+                    step1.classList.add('active');
+                    step2.classList.remove('active');
+                    step3.classList.remove('active');
+                });
+            }
+            
+            // Function to populate questions
+            function populateQuestions(personaData, questionList, currentPersona) {
+                // Clear question list
+                questionList.innerHTML = '';
+                
+                // Populate questions
+                const questions = [];
+                
+                // For single persona selection
+                if (Array.isArray(currentPersona.questions)) {
+                    currentPersona.questions.forEach(question => {
+                        const questionItem = document.createElement('div');
+                        questionItem.className = 'question-item';
+                        questionItem.setAttribute('data-question-id', question.id);
+                        
+                        questionItem.innerHTML = `
+                            <div class="question-checkbox">✓</div>
+                            <div class="question-number">#${question.number}</div>
+                            <div class="question-text">${question.text}</div>
+                            <div class="question-why">
+                                <div class="question-why-title">Why Ask:</div>
+                                <div>${question.why}</div>
+                            </div>
+                        `;
+                        
+                        // Modified click handler to toggle selection instead of immediately selecting
+                        questionItem.addEventListener('click', function(event) {
+                            // Only toggle if we didn't click on a child link or button
+                            if (!event.target.closest('a, button')) {
+                                // Toggle selection
+                                this.classList.toggle('selected');
+                                
+                                // Update questions counter
+                                window.updateQuestionCounter();
+                            }
+                        });
+                        
+                        questionList.appendChild(questionItem);
+                        questions.push(question);
+                    });
+                }
+                // For multiple persona selection
+                else {
+                    // Logic for combined questions from multiple personas
+                    let allQuestions = [];
+                    
+                    // Get questions from all selected personas
+                    document.querySelectorAll('.persona-card.selected').forEach(personaCard => {
+                        const personaId = personaCard.getAttribute('data-persona');
+                        const persona = personaData[personaId];
+                        
+                        persona.questions.forEach(question => {
+                            // Check if this question is already included (by ID)
+                            const existingQuestion = allQuestions.find(q => q.id === question.id);
+                            
+                            if (!existingQuestion) {
+                                // Add persona info to the question
+                                allQuestions.push({
+                                    ...question, 
+                                    personaId, 
+                                    personaTitle: persona.title
+                                });
+                            }
+                        });
+                    });
+                    
+                    // Sort questions by number
+                    allQuestions.sort((a, b) => parseInt(a.number) - parseInt(b.number));
+                    
+                    // Populate questions
+                    allQuestions.forEach(question => {
+                        const questionItem = document.createElement('div');
+                        questionItem.className = 'question-item';
+                        questionItem.setAttribute('data-question-id', question.id);
+                        questionItem.setAttribute('data-persona-id', question.personaId);
+                        
+                        questionItem.innerHTML = `
+                            <div class="question-checkbox">✓</div>
+                            <div class="question-persona-tag">${question.personaTitle}</div>
+                            <div class="question-number">#${question.number}</div>
+                            <div class="question-text">${question.text}</div>
+                            <div class="question-why">
+                                <div class="question-why-title">Why Ask:</div>
+                                <div>${question.why}</div>
+                            </div>
+                        `;
+                        
+                        // Modified click handler to toggle selection
+                        questionItem.addEventListener('click', function(event) {
+                            // Only toggle if we didn't click on a child link or button
+                            if (!event.target.closest('a, button')) {
+                                // Toggle selection
+                                this.classList.toggle('selected');
+                                
+                                // Update questions counter
+                                window.updateQuestionCounter();
+                            }
+                        });
+                        
+                        questionList.appendChild(questionItem);
+                        questions.push(question);
+                    });
+                }
+                
+                // Setup the question multi-selection functionality
+                setupQuestionMultiSelect(questions);
+                
+                return questions;
+            }
+            
+            // Select persona
+            function selectPersona(personaId) {
+                currentPersona = personaData[personaId];
+                
+                if (currentPersona) {
+                    // Update title
+                    selectedPersonaTitle.textContent = currentPersona.title;
+                    
+                    // Populate questions with the new function
+                    populateQuestions(personaData, questionList, currentPersona);
+                    
+                    // Show question view
+                    showView(questionView);
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                }
+            }
+            
+            // Setup question multi-selection
+            function setupQuestionMultiSelect(questions) {
+                const questionItems = document.querySelectorAll('.question-item');
+                const selectAllQuestionsBtn = document.getElementById('select-all-questions-btn');
+                const clearQuestionsBtn = document.getElementById('clear-questions-btn');
+                const viewOutcomesBtn = document.getElementById('view-outcomes-btn');
+                const questionsSelectedText = document.getElementById('questions-selected');
+                
+                let selectedQuestions = [];
+                
+                // Define the updateQuestionCounter function in the global scope
+                window.updateQuestionCounter = function() {
+                    selectedQuestions = [];
+                    
+                    // Get all selected questions
+                    document.querySelectorAll('.question-item.selected').forEach(item => {
+                        const questionId = parseInt(item.getAttribute('data-question-id'));
+                        const personaId = item.getAttribute('data-persona-id') || 
+                                         (Array.isArray(currentPersona.questions) ? 
+                                          Object.keys(personaData).find(key => personaData[key] === currentPersona) : null);
+                        
+                        selectedQuestions.push({ questionId, personaId });
+                    });
+                    
+                    const count = selectedQuestions.length;
+                    questionsSelectedText.textContent = `${count} question${count !== 1 ? 's' : ''} selected`;
+                    
+                    // Update button state
+                    if (count > 0) {
+                        viewOutcomesBtn.classList.remove('disabled');
+                    } else {
+                        viewOutcomesBtn.classList.add('disabled');
+                    }
+                    
+                    return selectedQuestions;
+                }
+                
+                // Select all questions button
+                selectAllQuestionsBtn.addEventListener('click', function() {
+                    document.querySelectorAll('.question-item').forEach(item => {
+                        item.classList.add('selected');
+                    });
+                    
+                    window.updateQuestionCounter();
+                });
+                
+                // Clear selection button
+                clearQuestionsBtn.addEventListener('click', function() {
+                    document.querySelectorAll('.question-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    window.updateQuestionCounter();
+                });
+                
+                // View outcomes button
+                viewOutcomesBtn.addEventListener('click', function() {
+                    const currentSelectedQuestions = window.updateQuestionCounter(); // Get fresh selection
+                    
+                    if (currentSelectedQuestions.length === 0) return;
+                    
+                    showMultipleOutcomes(currentSelectedQuestions, questions);
+                });
+                
+                // Initialize counter
+                window.updateQuestionCounter();
+            }
+            
+            // Show multiple outcomes
+            function showMultipleOutcomes(selectedQuestions, allQuestions) {
+                const outcomesContainer = document.getElementById('outcomes-container');
+                const noOutcomesMessage = document.getElementById('no-outcomes-message');
+                
+                // Clear previous outcomes
+                outcomesContainer.innerHTML = '';
+                
+                // Check if we have questions selected
+                if (!selectedQuestions || selectedQuestions.length === 0) {
+                    outcomesContainer.classList.add('hidden');
+                    noOutcomesMessage.classList.remove('hidden');
+                    return;
+                }
+                
+                try {
+                    // Get unique outcomes by combining questions with the same outcome
+                    const outcomeMap = {};
+                    
+                    // Process each selected question
+                    selectedQuestions.forEach(selected => {
+                        // Find the question data
+                        let question;
+                        
+                        // First look in our passed questions array
+                        if (Array.isArray(allQuestions)) {
+                            question = allQuestions.find(q => q.id === selected.questionId);
+                        }
+                        
+                        // If not found, look in the persona data
+                        if (!question && selected.personaId) {
+                            const persona = personaData[selected.personaId];
+                            if (persona && Array.isArray(persona.questions)) {
+                                question = persona.questions.find(q => q.id === selected.questionId);
+                                if (question) {
+                                    question.personaTitle = persona.title;
+                                }
+                            }
+                        }
+                        
+                        if (question && question.outcome) {
+                            const outcomeTitle = question.outcome.title;
+                            
+                            if (!outcomeMap[outcomeTitle]) {
+                                outcomeMap[outcomeTitle] = {
+                                    title: outcomeTitle,
+                                    description: question.outcome.description,
+                                    products: question.outcome.products,
+                                    questions: []
+                                };
+                            }
+                            
+                            outcomeMap[outcomeTitle].questions.push({
+                                number: question.number,
+                                text: question.text,
+                                personaTitle: question.personaTitle || ''
+                            });
+                        } else {
+                            console.error('Question not found or missing outcome:', selected);
+                        }
+                    });
+                    
+                    // Check if we have any outcomes
+                    if (Object.keys(outcomeMap).length === 0) {
+                        outcomesContainer.classList.add('hidden');
+                        noOutcomesMessage.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    // We have outcomes, show them
+                    outcomesContainer.classList.remove('hidden');
+                    noOutcomesMessage.classList.add('hidden');
+                    
+                    // Create outcome sections for each unique outcome
+                    Object.values(outcomeMap).forEach(outcome => {
+                        const outcomeElement = document.createElement('div');
+                        outcomeElement.className = 'outcome-container';
+                        
+                        let questionsHtml = '';
+                        if (outcome.questions && outcome.questions.length > 0) {
+                            outcome.questions.forEach(q => {
+                                questionsHtml += `<div class="outcome-question">Question #${q.number} (${q.personaTitle}): ${q.text}</div>`;
+                            });
+                        }
+                        
+                        let productsHtml = '';
+                        if (outcome.products && Array.isArray(outcome.products) && outcome.products.length > 0) {
+                            outcome.products.forEach(product => {
+                                if (product && product.name && product.logo) {
+                                    productsHtml += `
+                                        <div class="product-card">
+                                            <div class="product-header">
+                                                <div class="product-logo ${product.logo}">${product.logo.charAt(0).toUpperCase()}</div>
+                                                <div class="product-name">${product.name}</div>
+                                            </div>
+                                            <div class="product-content">
+                                                <div class="product-capabilities">${product.capability || ''}</div>
+                                                <div class="product-bottom">
+                                                    <div class="strength-indicator">
+                                                        <div class="strength-label">Capability Fit:</div>
+                                                        <div class="strength-bar">
+                                                            <div class="strength-value ${product.strength || 'moderate'}"></div>
+                                                        </div>
+                                                    </div>
+                                                    <a href="https://checkparlor.com/${product.name.toLowerCase()}" class="product-more-btn" target="_blank">
+                                                        <span>More Info</span>
+                                                        <span>→</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                        }
+                        
+                        if (!productsHtml) {
+                            productsHtml = '<div class="no-products">No product recommendations available for this outcome.</div>';
+                        }
+                        
+                        outcomeElement.innerHTML = `
+                            <div class="outcome-header">
+                                ${questionsHtml}
+                                
+                                <div class="outcome-box">
+                                    <div class="outcome-label">Outcome:</div>
+                                    <h2 class="outcome-title">${outcome.title || 'Unnamed Outcome'}</h2>
+                                    <p class="outcome-description">${outcome.description || 'No description available.'}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="product-section">
+                                <div class="product-container">
+                                    <h3 class="product-title">Recommended Security Solutions</h3>
+                                    <div class="product-grid">
+                                        ${productsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        outcomesContainer.appendChild(outcomeElement);
+                    });
+                } catch (error) {
+                    console.error('Error showing outcomes:', error);
+                    outcomesContainer.innerHTML = `
+                        <div class="error-message">
+                            <h3>Error Displaying Outcomes</h3>
+                            <p>There was a problem displaying the outcomes. Please try again or select different questions.</p>
+                            <pre>${error.message}</pre>
+                        </div>
+                    `;
+                }
+                
+                // Show outcome view
+                showView(outcomeView);
+                step2.classList.remove('active');
+                step3.classList.add('active');
+            }
+            
+            // Show view
+            function showView(view) {
+                // Hide all views
+                personaView.classList.remove('active');
+                questionView.classList.remove('active');
+                outcomeView.classList.remove('active');
+                
+                // Show selected view
+                view.classList.add('active');
+            }
+            
+            // Process all questions for search
+            function buildSearchIndex() {
+                // Clear the existing array
+                allQuestions.length = 0;
+                
+                // Process each persona and their questions
+                Object.keys(personaData).forEach(personaId => {
+                    const persona = personaData[personaId];
+                    
+                    // Add each question from this persona
+                    persona.questions.forEach(question => {
+                        // Add to the questions array with persona information
+                        allQuestions.push({
+                            id: question.id,
+                            personaId: personaId,
+                            personaTitle: persona.title,
+                            number: question.number,
+                            text: question.text,
+                            why: question.why
+                        });
+                        
+                        // Add to the outcomes object
+                        if (!allOutcomes[question.outcome.title]) {
+                            allOutcomes[question.outcome.title] = {
+                                title: question.outcome.title,
+                                description: question.outcome.description,
+                                questions: []
+                            };
+                        }
+                        
+                        // Link this question to the outcome
+                        allOutcomes[question.outcome.title].questions.push({
+                            id: question.id,
+                            personaId: personaId,
+                            personaTitle: persona.title,
+                            number: question.number,
+                            text: question.text
+                        });
+                    });
+                });
+            }
+            
+            // Search function
+            function performSearch(searchTerm) {
+                searchTerm = searchTerm.toLowerCase().trim();
+                
+                if (!searchTerm) {
+                    document.getElementById('search-results').classList.remove('active');
+                    return;
+                }
+                
+                const results = [];
+                
+                // Search in questions
+                allQuestions.forEach(question => {
+                    if (
+                        question.text.toLowerCase().includes(searchTerm) ||
+                        question.why.toLowerCase().includes(searchTerm) ||
+                        question.personaTitle.toLowerCase().includes(searchTerm)
+                    ) {
+                        results.push({
+                            type: 'question',
+                            id: question.id,
+                            personaId: question.personaId,
+                            personaTitle: question.personaTitle,
+                            title: `Question #${question.number}`,
+                            text: question.text,
+                            highlightText: highlightSearchTerm(question.text, searchTerm)
+                        });
+                    }
+                });
+                
+                // Search in outcomes
+                Object.values(allOutcomes).forEach(outcome => {
+                    if (
+                        outcome.title.toLowerCase().includes(searchTerm) ||
+                        outcome.description.toLowerCase().includes(searchTerm)
+                    ) {
+                        results.push({
+                            type: 'outcome',
+                            title: outcome.title,
+                            text: outcome.description,
+                            highlightText: highlightSearchTerm(outcome.description, searchTerm),
+                            questions: outcome.questions
+                        });
+                    }
+                });
+                
+                // Display results
+                const searchResultsList = document.getElementById('search-results-list');
+                const searchResults = document.getElementById('search-results');
+                
+                searchResultsList.innerHTML = '';
+                
+                if (results.length > 0) {
+                    results.forEach(result => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        
+                        if (result.type === 'question') {
+                            resultItem.innerHTML = `
+                                <div class="search-result-title">${result.title} (${result.personaTitle})</div>
+                                <div class="search-result-text">${result.highlightText}</div>
+                            `;
+                            
+                            // Add click event
+                            resultItem.addEventListener('click', function() {
+                                // First select the persona
+                                const personaCards = document.querySelectorAll('.persona-card');
+                                personaCards.forEach(card => {
+                                    card.classList.remove('selected');
+                                    if (card.getAttribute('data-persona') === result.personaId) {
+                                        card.classList.add('selected');
+                                    }
+                                });
+                                
+                                // Then proceed to questions
+                                selectPersona(result.personaId);
+                                
+                                // Highlight the question
+                                setTimeout(() => {
+                                    const questionItems = document.querySelectorAll('.question-item');
+                                    questionItems.forEach(item => {
+                                        if (parseInt(item.getAttribute('data-question-id')) === result.id) {
+                                            item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            item.style.backgroundColor = '#f0f9ff';
+                                            setTimeout(() => {
+                                                item.style.backgroundColor = '';
+                                            }, 2000);
+                                        }
+                                    });
+                                }, 100);
+                                
+                                // Hide search results
+                                searchResults.classList.remove('active');
+                            });
+                        } else {
+                            resultItem.innerHTML = `
+                                <div class="search-result-title">${result.title}</div>
+                                <div class="search-result-text">${result.highlightText}</div>
+                            `;
+                            
+                            // Add click event
+                            resultItem.addEventListener('click', function() {
+                                // Get the first question for this outcome
+                                if (result.questions && result.questions.length > 0) {
+                                    const firstQuestion = result.questions[0];
+                                    
+                                    // Select persona
+                                    const personaCards = document.querySelectorAll('.persona-card');
+                                    personaCards.forEach(card => {
+                                        card.classList.remove('selected');
+                                        if (card.getAttribute('data-persona') === firstQuestion.personaId) {
+                                            card.classList.add('selected');
+                                        }
+                                    });
+                                    
+                                    // Go to questions
+                                    selectPersona(firstQuestion.personaId);
+                                    
+                                    // Highlight all questions related to this outcome
+                                    setTimeout(() => {
+                                        const questionItems = document.querySelectorAll('.question-item');
+                                        const relatedQuestionIds = result.questions.map(q => q.id);
+                                        
+                                        let firstMatchingItem = null;
+                                        
+                                        questionItems.forEach(item => {
+                                            const itemId = parseInt(item.getAttribute('data-question-id'));
+                                            if (relatedQuestionIds.includes(itemId)) {
+                                                item.classList.add('selected');
+                                                if (!firstMatchingItem) {
+                                                    firstMatchingItem = item;
+                                                }
+                                            }
+                                        });
+                                        
+                                        // Scroll to the first matching item
+                                        if (firstMatchingItem) {
+                                            firstMatchingItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        }
+                                        
+                                        // Update the counter
+                                        if (window.updateQuestionCounter) {
+                                            window.updateQuestionCounter();
+                                        }
+                                    }, 100);
+                                    
+                                    // Hide search results
+                                    searchResults.classList.remove('active');
+                                }
+                            });
+                        }
+                        
+                        searchResultsList.appendChild(resultItem);
+                    });
+                } else {
+                    searchResultsList.innerHTML = `
+                        <div class="no-results">
+                            <p>No results found for "${searchTerm}"</p>
+                        </div>
+                    `;
+                }
+                
+                searchResults.classList.add('active');
+            }
+            
+            // Highlight search term
+            function highlightSearchTerm(text, term) {
+                if (!term) return text;
+                
+                const regex = new RegExp(term, 'gi');
+                return text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
+            }
+            
+            // Setup multi-selection for personas
+            function setupPersonaMultiSelect() {
+                const personaCards = document.querySelectorAll('.persona-card');
+                const selectAllBtn = document.getElementById('select-all-btn');
+                const clearSelectionBtn = document.getElementById('clear-selection-btn');
+                const continueBtn = document.getElementById('continue-btn');
+                const personasSelectedText = document.getElementById('personas-selected');
+                
+                selectedPersonas = [];
+                
+                function updatePersonaCounter() {
+                    const count = selectedPersonas.length;
+                    personasSelectedText.textContent = `${count} persona${count !== 1 ? 's' : ''} selected`;
+                    
+                    // Update continue button state
+                    if (count > 0) {
+                        continueBtn.classList.remove('disabled');
+                    } else {
+                        continueBtn.classList.add('disabled');
+                    }
+                }
+                
+                // Continue button click
+                continueBtn.addEventListener('click', function() {
+                    if (selectedPersonas.length > 0) {
+                        proceedWithSelectedPersonas();
+                    }
+                });
+                
+                // Persona card click
+                personaCards.forEach(card => {
+                    card.addEventListener('click', function(event) {
+                        const personaId = this.getAttribute('data-persona');
+                        
+                        // Toggle selection
+                        if (this.classList.contains('selected')) {
+                            this.classList.remove('selected');
+                            selectedPersonas = selectedPersonas.filter(id => id !== personaId);
+                        } else {
+                            this.classList.add('selected');
+                            selectedPersonas.push(personaId);
+                        }
+                        
+                        updatePersonaCounter();
+                        
+                        // Prevent the normal select persona action if clicking on the card itself
+                        if (event.target.closest('.checkbox') || event.target.closest('.persona-more')) {
+                            // If clicking continue or checkbox, proceed
+                            if (selectedPersonas.length > 0 && event.target.closest('.persona-more')) {
+                                proceedWithSelectedPersonas();
+                            }
+                        }
+                    });
+                    
+                    // Add separate click for the "Select Persona" button
+                    const moreBtn = card.querySelector('.persona-more');
+                    if (moreBtn) {
+                        moreBtn.addEventListener('click', function(event) {
+                            event.stopPropagation(); // Prevent triggering card click
+                            
+                            const personaId = card.getAttribute('data-persona');
+                            
+                            // Ensure this persona is selected
+                            if (!card.classList.contains('selected')) {
+                                card.classList.add('selected');
+                                selectedPersonas.push(personaId);
+                                updatePersonaCounter();
+                            }
+                            
+                            if (selectedPersonas.length > 0) {
+                                proceedWithSelectedPersonas();
+                            }
+                        });
+                    }
+                });
+                
+                // Select all button
+                selectAllBtn.addEventListener('click', function() {
+                    selectedPersonas = [];
+                    
+                    personaCards.forEach(card => {
+                        card.classList.add('selected');
+                        selectedPersonas.push(card.getAttribute('data-persona'));
+                    });
+                    
+                    updatePersonaCounter();
+                });
+                
+                // Clear selection button
+                clearSelectionBtn.addEventListener('click', function() {
+                    personaCards.forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    
+                    selectedPersonas = [];
+                    updatePersonaCounter();
+                });
+                
+                // Proceed with selected personas
+                function proceedWithSelectedPersonas() {
+                    if (selectedPersonas.length === 0) return;
+                    
+                    // Combine questions from all selected personas
+                    let personaTitles = [];
+                    
+                    selectedPersonas.forEach(personaId => {
+                        const persona = personaData[personaId];
+                        personaTitles.push(persona.title);
+                    });
+                    
+                    // Set current persona(s) display
+                    currentPersona = {
+                        title: personaTitles.join(', ')
+                    };
+                    selectedPersonaTitle.textContent = currentPersona.title;
+                    
+                    // Populate questions with the new function
+                    populateQuestions(personaData, questionList, currentPersona);
+                    
+                    // Show question view
+                    showView(questionView);
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                }
+                
+                // Initialize counter
+                updatePersonaCounter();
+            }
+            
+            // Setup search functionality
+            function setupSearch() {
+                const globalSearchInput = document.getElementById('global-search');
+                const questionSearchInput = document.getElementById('question-search');
+                const searchResults = document.getElementById('search-results');
+                
+                // Build search index
+                buildSearchIndex();
+                
+                // Global search
+                globalSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.trim();
+                    performSearch(searchTerm);
+                });
+                
+                globalSearchInput.addEventListener('blur', function() {
+                    // Delay hiding to allow for clicking on results
+                    setTimeout(() => {
+                        searchResults.classList.remove('active');
+                    }, 200);
+                });
+                
+                globalSearchInput.addEventListener('focus', function() {
+                    const searchTerm = this.value.trim();
+                    if (searchTerm) {
+                        performSearch(searchTerm);
+                    }
+                });
+                
+                // Question filter
+                questionSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    const questionItems = document.querySelectorAll('.question-item');
+                    
+                    questionItems.forEach(item => {
+                        const questionText = item.querySelector('.question-text').textContent.toLowerCase();
+                        const questionWhy = item.querySelector('.question-why div:last-child').textContent.toLowerCase();
+                        const personaTag = item.querySelector('.question-persona-tag')?.textContent.toLowerCase() || '';
+                        
+                        if (
+                            questionText.includes(searchTerm) || 
+                            questionWhy.includes(searchTerm) || 
+                            personaTag.includes(searchTerm)
+                        ) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+                
+                // Close search results when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('.search-container') && !event.target.closest('.search-results')) {
+                        searchResults.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Initialize
+            init();
+            buildSearchIndex(); // Build search index first, before setup
+            setupPersonaMultiSelect();
+            setupSearch();
+        });
+    </script>
+</body>
+</html>
